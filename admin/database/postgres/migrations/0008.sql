@@ -57,20 +57,20 @@ CREATE TABLE users_projects_roles (
 CREATE TABLE usergroups (
                             id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
                             org_id UUID NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
-                            display_name TEXT NOT NULL
+                            display_name TEXT NOT NULL,
+                            description TEXT
 );
 
 -- create all users group for existing organizations
 INSERT INTO usergroups (org_id, display_name) SELECT id, 'all_users' FROM organizations;
 
 -- add all_group_id column to the organizations table referencing usergroups table
-ALTER TABLE organizations ADD COLUMN all_group_id UUID REFERENCES usergroups (id) ON DELETE CASCADE;;
+ALTER TABLE organizations ADD COLUMN all_group_id UUID REFERENCES usergroups (id) ON DELETE RESTRICT;
 
 -- insert all_group_id into the organizations table for existing organizations
 UPDATE organizations SET all_group_id = (SELECT id FROM usergroups WHERE org_id = organizations.id AND display_name = 'all_users');
 
--- make all_group_id column not null
-ALTER TABLE organizations ALTER COLUMN all_group_id SET NOT NULL;
+-- ALTER TABLE organizations ALTER COLUMN all_group_id SET NOT NULL;
 
 CREATE TABLE users_usergroups (
                                   user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
