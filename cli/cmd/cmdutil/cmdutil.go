@@ -2,7 +2,6 @@ package cmdutil
 
 import (
 	"fmt"
-	adminv1 "github.com/rilldata/rill/proto/gen/rill/admin/v1"
 	"os"
 	"strings"
 	"time"
@@ -12,6 +11,7 @@ import (
 	"github.com/lensesio/tableprinter"
 	"github.com/manifoldco/promptui"
 	"github.com/rilldata/rill/cli/pkg/config"
+	adminv1 "github.com/rilldata/rill/proto/gen/rill/admin/v1"
 	"github.com/spf13/cobra"
 )
 
