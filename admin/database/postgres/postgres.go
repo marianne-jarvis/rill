@@ -570,7 +570,7 @@ func (c *connection) ResolveUserGroupOrgRoles(ctx context.Context, userID, orgID
 func (c *connection) ResolveUserGroupProjectRoles(ctx context.Context, userID, projectID string) ([]*database.ProjectRole, error) {
 	var res []*database.ProjectRole
 	err := c.getDB(ctx).SelectContext(ctx, &res, `
-		SELECT * FROM projects_roles WHERE id IN (
+		SELECT * FROM project_roles WHERE id IN (
 			SELECT project_role_id FROM usergroups_projects_roles upr JOIN users_usergroups uug 
 			ON upr.usergroup_id = uug.group_id WHERE uug.user_id = $1 AND upr.project_id = $2
 	)`, userID, projectID)
