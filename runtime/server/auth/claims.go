@@ -21,10 +21,10 @@ type Claims interface {
 // jwtClaims implements Claims and resolve permissions based on a JWT payload.
 type jwtClaims struct {
 	jwt.RegisteredClaims
-	System    []Permission            `json:"sys,omitempty"`
-	Instances map[string][]Permission `json:"ins,omitempty"`
-	Email     string                  `json:"email"`
-	Groups    []string                `json:"group_names"`
+	System     []Permission            `json:"sys,omitempty"`
+	Instances  map[string][]Permission `json:"ins,omitempty"`
+	Email      string                  `json:"email"`
+	GroupNames []string                `json:"group_names"`
 }
 
 func (c *jwtClaims) Subject() string {
@@ -54,7 +54,7 @@ func (c *jwtClaims) GetEmail() string {
 }
 
 func (c *jwtClaims) GetUserGroups() []string {
-	return c.Groups
+	return c.GroupNames
 }
 
 // openClaims implements Claims and allows all actions.
