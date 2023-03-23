@@ -26,6 +26,7 @@
   import MetricsEntityTable from "./MetricsEntityTable.svelte";
   import LayoutManager from "./MetricsLayoutManager.svelte";
   import MetricsWorkspaceHeader from "./MetricsWorkspaceHeader.svelte";
+  import Policies from "./Policies.svelte";
 
   // the runtime yaml string
   export let yaml: string;
@@ -217,6 +218,7 @@
             tooltipText={"Add a new dimension"}
             addButtonId={"add-dimension-button"}
           />
+          <Policies slot="policies" {metricsInternalRep} />
         </LayoutManager>
       </div>
     </div>

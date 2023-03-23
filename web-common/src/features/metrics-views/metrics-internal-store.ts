@@ -9,9 +9,14 @@ import { Document, ParsedNode, parseDocument, YAMLMap } from "yaml";
 import type { Collection } from "yaml/dist/nodes/Collection";
 import { selectTimestampColumnFromSchema } from "./column-selectors";
 
+interface Policy {
+  expression: string;
+}
+
 export interface MetricsConfig extends MetricsParams {
   measures: MeasureEntity[];
   dimensions: DimensionEntity[];
+  policies: Policy[];
 }
 export interface MetricsParams {
   display_name: string;
@@ -222,6 +227,16 @@ export class MetricsInternalRepresentation {
 
   deleteDimension(index: number) {
     this.internalRepresentationDocument.deleteIn(["dimensions", index]);
+    this.regenerateInternalYAML();
+  }
+
+  // POLICIES
+  updatePolicies(expression: string) {
+    // currently assuming one policy
+    const policyNode = this.internalRepresentationDocument.createNode({
+      expression: expression,
+    });
+    this.internalRepresentationDocument.set("policies", [policyNode]);
     this.regenerateInternalYAML();
   }
 }

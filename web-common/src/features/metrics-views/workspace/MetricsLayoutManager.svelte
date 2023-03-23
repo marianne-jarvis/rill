@@ -70,4 +70,7 @@
   <div style={bottomStyle}>
     <slot name="bottom-item" {bottomResizeCallback} />
   </div>
+  <div class="mt-6">
+    <slot name="policies" />
+  </div>
 </div>
