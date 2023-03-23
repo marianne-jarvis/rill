@@ -232,11 +232,7 @@ export class MetricsInternalRepresentation {
 
   // POLICIES
   updatePolicies(expression: string) {
-    // currently assuming one policy
-    const policyNode = this.internalRepresentationDocument.createNode({
-      expression: expression,
-    });
-    this.internalRepresentationDocument.set("policies", [policyNode]);
+    this.internalRepresentationDocument.set("policies", expression);
     this.regenerateInternalYAML();
   }
 }

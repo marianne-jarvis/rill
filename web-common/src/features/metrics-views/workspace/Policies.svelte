@@ -10,12 +10,11 @@
 
   export let metricsInternalRep;
 
-  $: policiesNode = $metricsInternalRep.getMetricKey("policies");
-  $: firstPolicy = policiesNode[0].expression;
+  $: policies = $metricsInternalRep.getMetricKey("policies");
 
   const { form, handleSubmit } = createForm({
     initialValues: {
-      newPolicy: firstPolicy || "",
+      newPolicy: policies || "",
     },
     onSubmit: async (values) => {
       try {
@@ -40,7 +39,7 @@
   }
 
   // This kicks in when the user changes the policies via code artifact
-  $: updateFormWithNewPolicy(firstPolicy);
+  $: updateFormWithNewPolicy(policies);
 </script>
 
 <div class="flex flex-col gap-y-2">
