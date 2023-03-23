@@ -591,7 +591,7 @@ func (c *connection) FindOrganizationRole(ctx context.Context, name string) (*da
 
 func (c *connection) FindProjectRole(ctx context.Context, name string) (*database.ProjectRole, error) {
 	role := &database.ProjectRole{}
-	err := c.getDB(ctx).QueryRowxContext(ctx, "SELECT * FROM ptoject_roles WHERE name = $1", name).Scan(role)
+	err := c.getDB(ctx).QueryRowxContext(ctx, "SELECT * FROM project_roles WHERE name = $1", name).Scan(role)
 	if err != nil {
 		return nil, parseErr(err)
 	}
