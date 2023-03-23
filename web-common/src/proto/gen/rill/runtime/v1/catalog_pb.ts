@@ -506,6 +506,13 @@ export class MetricsView extends Message<MetricsView> {
    */
   defaultTimeRange = "";
 
+  /**
+   * sql clause for policies
+   *
+   * @generated from field: string policies = 11;
+   */
+  policies = "";
+
   constructor(data?: PartialMessage<MetricsView>) {
     super();
     proto3.util.initPartial(data, this);
@@ -523,6 +530,7 @@ export class MetricsView extends Message<MetricsView> {
     { no: 8, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 9, name: "smallest_time_grain", kind: "enum", T: proto3.getEnumType(TimeGrain) },
     { no: 10, name: "default_time_range", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 11, name: "policies", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MetricsView {

@@ -112,6 +112,8 @@ message MetricsView {
   TimeGrain smallest_time_grain = 9;
   // Default time range for the dashboard. It should be a valid ISO 8601 duration string.
   string default_time_range = 10;
+  // sql clause for policies
+  string policies = 11;
 }
 
 enum TimeGrain {

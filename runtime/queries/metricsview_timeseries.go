@@ -23,6 +23,7 @@ type MetricsViewTimeSeries struct {
 	TimeGranularity runtimev1.TimeGrain          `json:"time_granularity,omitempty"`
 
 	Result *runtimev1.MetricsViewTimeSeriesResponse `json:"-"`
+	Policy string                                   `json:"policy"`
 }
 
 var _ runtime.Query = &MetricsViewTimeSeries{}
@@ -86,6 +87,7 @@ func (q *MetricsViewTimeSeries) Resolve(ctx context.Context, rt *runtime.Runtime
 		},
 		Measures: measures,
 		Filters:  q.Filter,
+		Policy:   q.Policy,
 	}
 	err = rt.Query(ctx, instanceID, tsq, priority)
 	if err != nil {

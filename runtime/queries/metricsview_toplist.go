@@ -24,6 +24,7 @@ type MetricsViewToplist struct {
 	Filter          *runtimev1.MetricsViewFilter `json:"filter,omitempty"`
 
 	Result *runtimev1.MetricsViewToplistResponse `json:"-"`
+	Policy string                                `json:"policy"`
 }
 
 var _ runtime.Query = &MetricsViewToplist{}
@@ -130,6 +131,10 @@ func (q *MetricsViewToplist) buildMetricsTopListSQL(mv *runtimev1.MetricsView) (
 		}
 		whereClause += " " + clause
 		args = append(args, clauseArgs...)
+	}
+
+	if q.Policy != "" {
+		whereClause += fmt.Sprintf(" AND %s", q.Policy)
 	}
 
 	orderClause := "true"

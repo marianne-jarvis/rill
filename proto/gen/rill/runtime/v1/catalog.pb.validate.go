@@ -596,6 +596,8 @@ func (m *MetricsView) validate(all bool) error {
 
 	// no validation rules for DefaultTimeRange
 
+	// no validation rules for Policies
+
 	if len(errors) > 0 {
 		return MetricsViewMultiError(errors)
 	}

@@ -1825,6 +1825,9 @@ definitions:
       name:
         type: string
         title: Name of the metrics view
+      policies:
+        type: string
+        title: sql clause for policies
       smallestTimeGrain:
         $ref: '#/definitions/v1TimeGrain'
         title: Smallest time grain to show in the dashboard

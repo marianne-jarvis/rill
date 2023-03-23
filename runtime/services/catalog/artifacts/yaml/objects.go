@@ -52,6 +52,7 @@ type MetricsView struct {
 	TimeDimension     string `yaml:"timeseries"`
 	SmallestTimeGrain string `yaml:"smallest_time_grain"`
 	DefaultTimeRange  string `yaml:"default_time_range"`
+	Policies          string `yaml:"policies,omitempty"`
 	Dimensions        []*Dimension
 	Measures          []*Measure
 }
@@ -319,6 +320,7 @@ func fromMetricsViewArtifact(metrics *MetricsView, path string) (*drivers.Catalo
 		return nil, err
 	}
 	apiMetrics.SmallestTimeGrain = timeGrainEnum
+	apiMetrics.Policies = metrics.Policies
 
 	name := fileutil.Stem(path)
 	apiMetrics.Name = name

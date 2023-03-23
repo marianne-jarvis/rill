@@ -34,6 +34,7 @@ type ColumnTimeseries struct {
 	Filters             *runtimev1.MetricsViewFilter                      `json:"filters"`
 	Pixels              int32                                             `json:"pixels"`
 	SampleSize          int32                                             `json:"sample_size"`
+	Policy              string                                            `json:"policy"`
 	Result              *ColumnTimeseriesResult                           `json:"-"`
 }
 
@@ -91,6 +92,12 @@ func (q *ColumnTimeseries) Resolve(ctx context.Context, rt *runtime.Runtime, ins
 		}
 		if filter != "" {
 			filter = "WHERE 1=1 " + filter
+		}
+		if q.Policy != "" {
+			if filter == "" {
+				filter = "WHERE 1=1 "
+			}
+			filter += fmt.Sprintf(" AND %s", q.Policy)
 		}
 
 		measures := normaliseMeasures(q.Measures, q.Pixels != 0)

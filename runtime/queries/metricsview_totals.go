@@ -18,6 +18,7 @@ type MetricsViewTotals struct {
 	TimeStart       *timestamppb.Timestamp       `json:"time_start,omitempty"`
 	TimeEnd         *timestamppb.Timestamp       `json:"time_end,omitempty"`
 	Filter          *runtimev1.MetricsViewFilter `json:"filter,omitempty"`
+	Policy          string                       `json:"policy"`
 
 	Result *runtimev1.MetricsViewTotalsResponse `json:"-"`
 }
@@ -127,6 +128,10 @@ func (q *MetricsViewTotals) buildMetricsTotalsSQL(mv *runtimev1.MetricsView) (st
 		}
 		whereClause += " " + clause
 		args = append(args, clauseArgs...)
+	}
+
+	if q.Policy != "" {
+		whereClause += fmt.Sprintf(" AND %s", q.Policy)
 	}
 
 	sql := fmt.Sprintf(

@@ -538,6 +538,7 @@ export interface V1MetricsView {
   measures?: MetricsViewMeasure[];
   model?: string;
   name?: string;
+  policies?: string;
   smallestTimeGrain?: V1TimeGrain;
   timeDimension?: string;
 }

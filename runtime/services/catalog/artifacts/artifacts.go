@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"text/template"
@@ -60,15 +61,23 @@ func Read(ctx context.Context, repoStore drivers.RepoStore, registryStore driver
 	delete(funcMap, "env")
 	delete(funcMap, "expandenv")
 
-	// convert templatised artifact
-	t, err := template.New("source").Funcs(funcMap).Option("missingkey=error").Parse(blob)
-	if err != nil {
-		return nil, err
-	}
-
+	dir := filepath.Base(filepath.Dir(filePath))
+	opts := make([]string, 0)
 	bw := new(bytes.Buffer)
-	if err := t.Execute(bw, env); err != nil {
-		return nil, err
+	switch dir {
+	case "dashboards":
+		bw.WriteString(blob)
+	default:
+		opts = append(opts, "missingkey=error")
+		// convert templatised artifact
+		t, err := template.New("source").Funcs(funcMap).Option(opts...).Parse(blob)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := t.Execute(bw, env); err != nil {
+			return nil, err
+		}
 	}
 
 	catalog, err := artifact.DeSerialise(ctx, filePath, bw.String())

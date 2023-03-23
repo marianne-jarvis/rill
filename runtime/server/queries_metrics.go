@@ -1,8 +1,13 @@
 package server
 
 import (
+	"bytes"
 	"context"
+	"errors"
+	"fmt"
+	"text/template"
 
+	"github.com/rilldata/rill/admin/database"
 	runtimev1 "github.com/rilldata/rill/proto/gen/rill/runtime/v1"
 	"github.com/rilldata/rill/runtime/queries"
 	"github.com/rilldata/rill/runtime/server/auth"
@@ -13,10 +18,24 @@ import (
 
 // MetricsViewToplist implements QueryService.
 func (s *Server) MetricsViewToplist(ctx context.Context, req *runtimev1.MetricsViewToplistRequest) (*runtimev1.MetricsViewToplistResponse, error) {
-	if !auth.GetClaims(ctx).CanInstance(req.InstanceId, auth.ReadMetrics) {
+	claims := auth.GetClaims(ctx)
+	if !claims.CanInstance(req.InstanceId, auth.ReadMetrics) {
 		return nil, ErrForbidden
 	}
 
+	cat, err := s.runtime.GetCatalogEntry(ctx, req.InstanceId, req.MetricsViewName)
+	if err != nil {
+		if errors.Is(err, database.ErrNotFound) {
+			return nil, ErrForbidden
+		}
+		return nil, fmt.Errorf("failed with error %w", err)
+	}
+
+	mv := cat.GetMetricsView()
+	policy, err := s.resolvedPolicy(mv.Policies, claims.GetEmail(), "")
+	if err != nil {
+		return nil, err
+	}
 	q := &queries.MetricsViewToplist{
 		MetricsViewName: req.MetricsViewName,
 		DimensionName:   req.DimensionName,
@@ -27,8 +46,9 @@ func (s *Server) MetricsViewToplist(ctx context.Context, req *runtimev1.MetricsV
 		Offset:          req.Offset,
 		Sort:            req.Sort,
 		Filter:          req.Filter,
+		Policy:          policy,
 	}
-	err := s.runtime.Query(ctx, req.InstanceId, q, int(req.Priority))
+	err = s.runtime.Query(ctx, req.InstanceId, q, int(req.Priority))
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +58,23 @@ func (s *Server) MetricsViewToplist(ctx context.Context, req *runtimev1.MetricsV
 
 // MetricsViewTimeSeries implements QueryService.
 func (s *Server) MetricsViewTimeSeries(ctx context.Context, req *runtimev1.MetricsViewTimeSeriesRequest) (*runtimev1.MetricsViewTimeSeriesResponse, error) {
-	if !auth.GetClaims(ctx).CanInstance(req.InstanceId, auth.ReadMetrics) {
+	claims := auth.GetClaims(ctx)
+	if !claims.CanInstance(req.InstanceId, auth.ReadMetrics) {
 		return nil, ErrForbidden
+	}
+
+	cat, err := s.runtime.GetCatalogEntry(ctx, req.InstanceId, req.MetricsViewName)
+	if err != nil {
+		if errors.Is(err, database.ErrNotFound) {
+			return nil, ErrForbidden
+		}
+		return nil, fmt.Errorf("failed with error %w", err)
+	}
+
+	mv := cat.GetMetricsView()
+	policy, err := s.resolvedPolicy(mv.Policies, claims.GetEmail(), "")
+	if err != nil {
+		return nil, err
 	}
 
 	q := &queries.MetricsViewTimeSeries{
@@ -49,9 +84,10 @@ func (s *Server) MetricsViewTimeSeries(ctx context.Context, req *runtimev1.Metri
 		TimeEnd:         req.TimeEnd,
 		TimeGranularity: req.TimeGranularity,
 		Filter:          req.Filter,
+		Policy:          policy,
 	}
 
-	err := s.runtime.Query(ctx, req.InstanceId, q, int(req.Priority))
+	err = s.runtime.Query(ctx, req.InstanceId, q, int(req.Priority))
 	if err != nil {
 		return nil, err
 	}
@@ -60,8 +96,23 @@ func (s *Server) MetricsViewTimeSeries(ctx context.Context, req *runtimev1.Metri
 
 // MetricsViewTotals implements QueryService.
 func (s *Server) MetricsViewTotals(ctx context.Context, req *runtimev1.MetricsViewTotalsRequest) (*runtimev1.MetricsViewTotalsResponse, error) {
-	if !auth.GetClaims(ctx).CanInstance(req.InstanceId, auth.ReadMetrics) {
+	claims := auth.GetClaims(ctx)
+	if !claims.CanInstance(req.InstanceId, auth.ReadMetrics) {
 		return nil, ErrForbidden
+	}
+
+	cat, err := s.runtime.GetCatalogEntry(ctx, req.InstanceId, req.MetricsViewName)
+	if err != nil {
+		if errors.Is(err, database.ErrNotFound) {
+			return nil, ErrForbidden
+		}
+		return nil, fmt.Errorf("failed with error %w", err)
+	}
+
+	mv := cat.GetMetricsView()
+	policy, err := s.resolvedPolicy(mv.Policies, claims.GetEmail(), "")
+	if err != nil {
+		return nil, err
 	}
 
 	q := &queries.MetricsViewTotals{
@@ -70,12 +121,30 @@ func (s *Server) MetricsViewTotals(ctx context.Context, req *runtimev1.MetricsVi
 		TimeStart:       req.TimeStart,
 		TimeEnd:         req.TimeEnd,
 		Filter:          req.Filter,
+		Policy:          policy,
 	}
-	err := s.runtime.Query(ctx, req.InstanceId, q, int(req.Priority))
+	err = s.runtime.Query(ctx, req.InstanceId, q, int(req.Priority))
 	if err != nil {
 		return nil, err
 	}
 	return q.Result, nil
+}
+
+func (s *Server) resolvedPolicy(policy, email, group string) (string, error) {
+	// this is required in order to be able to use env.KEY and not .KEY in template placeholders
+	env := map[string]map[string]string{"user": {"email": email, "group": group}}
+
+	// convert templatised artifact
+	t, err := template.New("source").Option("missingkey=error").Parse(policy)
+	if err != nil {
+		return "", err
+	}
+
+	bw := new(bytes.Buffer)
+	if err := t.Execute(bw, env); err != nil {
+		return "", err
+	}
+	return bw.String(), nil
 }
 
 // Commenting as its unused
